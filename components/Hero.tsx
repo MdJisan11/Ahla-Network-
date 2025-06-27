@@ -1,0 +1,1 @@
+// Hero section with glow animation using Framer Motion
