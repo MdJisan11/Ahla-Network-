@@ -322,3 +322,57 @@
     </div>
 </body>
 </html>
+
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Ahla Testnet Swap</title>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+  <h1>Ahla Network - Testnet Swap</h1>
+  <button onclick="connect()">🔗 Connect Wallet</button>
+  <p id="wallet"></p>
+  <p>Balance: <span id="balance"></span></p>
+
+  <h3>💸 Swap</h3>
+  <select id="direction">
+    <option value="ahla_to_eth">AHLA → Sepolia ETH</option>
+    <option value="eth_to_ahla">Sepolia ETH → AHLA</option>
+  </select>
+  <input type="number" id="amount" placeholder="Amount">
+  <button onclick="swap()">Swap</button>
+  <p id="status"></p>
+
+  <script>
+    let address = "";
+
+    async function connect() {
+      if (window.ethereum) {
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        address = accounts[0];
+        document.getElementById("wallet").innerText = "Connected: " + address;
+        const res = await axios.get("https://ahla-testnet-backend.onrender.com/balance/" + address);
+        document.getElementById("balance").innerText = res.data.ahla + " AHLA / " + res.data.eth + " ETH";
+      } else {
+        alert("Please install MetaMask.");
+      }
+    }
+
+    async function swap() {
+      const amount = parseFloat(document.getElementById("amount").value);
+      const direction = document.getElementById("direction").value;
+      const res = await axios.post("https://ahla-testnet-backend.onrender.com/swap", {
+        address, amount, direction
+      }).catch(e => {
+        document.getElementById("status").innerText = "❌ " + e.response.data.error;
+      });
+
+      if (res && res.data.success) {
+        document.getElementById("status").innerText = "✅ Swap successful!";
+        connect();  // refresh balance
+      }
+    }
+  </script>
+</body>
+</html>
